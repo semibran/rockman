@@ -1,0 +1,32 @@
+{
+  "name": "rockman",
+  "version": "0.0.0",
+  "description": "Series of Mega Man tests",
+  "license": "MIT",
+  "author": "Brandon Semilla <semibran@gmail.com>",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/semibran/tetris.git"
+  },
+  "scripts": {
+    "start": "run-p serve watch",
+    "serve": "budo src/js/index.js --live --css build/style.css -- -t bulkify src/js/app/index.js src/js/app/sprites.js",
+    "watch": "node-sass -w src/scss/style.scss build/style.css"
+  },
+  "devDependencies": {
+    "budo": "^9.4.7",
+    "bulkify": "^1.4.2",
+    "node-sass": "^4.5.0",
+    "npm-run-all": "^4.0.2"
+  },
+  "dependencies": {
+    "bel": "^4.5.1",
+    "canvas": "github:semibran/canvas",
+    "canvas-draw": "github:semibran/canvas-draw",
+    "grid": "github:semibran/grid",
+    "image": "github:semibran/image",
+    "keys": "github:semibran/keys",
+    "rect": "github:semibran/rect"
+  }
+}
