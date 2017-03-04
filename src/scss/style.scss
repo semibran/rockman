@@ -13,6 +13,7 @@ body {
 main {
 	position: relative;
 	display: flex;
+	overflow: hidden;
 	image-rendering: pixelated;
 }
 

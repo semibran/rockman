@@ -84,6 +84,16 @@ module.exports = function use(sprites) {
 					return sprites.BUNKER_INNER_UPPER
 				else if (left === tile && stage(x - 1, y + 1) === tile)
 					return sprites.BUNKER_INNER_LOWER
+			case 'satellite':
+				if (bottom !== tile)
+					if (right !== tile)
+						return sprites.SATELLITE_BOTTOM_BACK_RIGHT
+					else
+						return sprites.SATELLITE_BOTTOM_BACK_LEFT
+				else if (top !== tile)
+					return sprites.SATELLITE_TOP_BACK
+				else
+					return sprites.SATELLITE_BACK
 			case 'fence':
 				if (top !== tile)
 					return sprites.FENCE_TOP

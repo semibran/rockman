@@ -7,6 +7,7 @@ const symbols = {
 	'-': { type: 'wall',   solid: true },
 	'W': { type: 'wily',   solid: true },
 	'C': { type: 'bunker', solid: true },
+	'S': { type: 'satellite' },
 	'X': { type: 'fence' },
 	'E': { type: 'barrel' },
 	'.': { type: 'pipe' },
@@ -17,9 +18,9 @@ module.exports = (
 	'%%%%% %%========' +
 	'  %%   %==.....=' +
 	'       C==..,,.=' +
-	'       CC....,.=' +
-	'        .......=' +
-	'        ..,....=' +
+	'S      CC....,.=' +
+	'S       .......=' +
+	'SS      ..,....=' +
 	'---|   CC===|===' +
 	'---|   C====|===' +
 	'W--|XXXX==..|..=' +

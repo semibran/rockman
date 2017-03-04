@@ -1,7 +1,7 @@
 module.exports = {
-	name: 'Fortress Entrance',
 	data: require('./data'),
 	spawns: [
-		[0, 0]
+		[1, 4],
+		[12, 10, -1],
 	]
 }

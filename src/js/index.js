@@ -1,30 +1,31 @@
 const { Stage, Actor, stages, actors } = require('./app')
 const sprites = require('./app/sprites')(setup)
-const html = require('bel')
-const Draw = require('canvas-draw')
+const Display = require('./display')
+
+const controls = require('./controls')
+const input = require('./input')(controls, function update(keys, actor) {
+	if (keys.left && (!keys.right || keys.left < keys.right))
+		actor.move(-1)
+	else if (keys.right && (!keys.left || keys.right < keys.left))
+		actor.move(1)
+})
+const keys = require('keys')(window)
 
 var stage, actor
+var display = Display(sprites)
+document.body.appendChild(display.element)
 
 function setup() {
+	stage = Stage(stages.wily)
+	actor = Actor(actors.rock)
+	actor.spawn(stage, ...stage.spawns[0])
+	display.render(stage)
+	requestAnimationFrame(loop)
+}
 
-	stage = Stage(stages.wily.data)
-	actor = Actor(actors.rock.data)
-	actor.spawn(stage, ...stages.wily.spawns[0])
-
-	var background = sprites.stages.wily.render(stage)
-	background.className = 'stage'
-
-	var sprite = sprites.actors.rock.render(actor)
-	var canvas = html`<canvas width=${sprite.width} height=${sprite.height} />`
-	canvas.className = 'actor'
-	canvas.style.left = 0
-	canvas.style.top = 0
-	Draw(canvas).image(sprite)(0, 0)
-
-	document.body.appendChild(html`
-		<main>
-			${background}
-			${canvas}
-		</main>`)
-
+function loop() {
+	requestAnimationFrame(loop)
+	input(keys, actor)
+	stage.update()
+	display.render(stage)
 }
