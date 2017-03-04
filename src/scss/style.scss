@@ -1,0 +1,22 @@
+html, body {
+	height: 100%;
+}
+
+body {
+	background: black;
+	display: flex;
+	&, > * {
+		margin: auto;
+	}
+}
+
+main {
+	position: relative;
+	display: flex;
+	image-rendering: pixelated;
+}
+
+.actor {
+	position: absolute;
+	z-index: 1;
+}
