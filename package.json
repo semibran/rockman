@@ -1,32 +1,29 @@
 {
   "name": "rockman",
   "version": "0.0.0",
-  "description": "Series of Mega Man tests",
+  "description": "megaman clone",
+  "author": "semibran (Brandon Semilla)",
+  "repository": "semibran/rockman",
   "license": "MIT",
-  "author": "Brandon Semilla <semibran@gmail.com>",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/semibran/tetris.git"
-  },
-  "scripts": {
-    "start": "run-p serve watch",
-    "serve": "budo src/js/index.js --live --css build/style.css -- -t bulkify src/js/app/index.js src/js/app/sprites.js",
-    "watch": "node-sass -w src/scss/style.scss build/style.css"
-  },
+  "main": "src/script.js",
+  "keywords": [],
   "devDependencies": {
-    "budo": "^9.4.7",
-    "bulkify": "^1.4.2",
-    "node-sass": "^4.5.0",
-    "npm-run-all": "^4.0.2"
-  },
-  "dependencies": {
-    "bel": "^4.5.1",
-    "canvas": "github:semibran/canvas",
-    "canvas-draw": "github:semibran/canvas-draw",
-    "grid": "github:semibran/grid",
-    "image": "github:semibran/image",
-    "keys": "github:semibran/keys",
-    "rect": "github:semibran/rect"
+    "async-map": "^0.2.0",
+    "autoprefixer": "^8.1.0",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "clean-css-cli": "^4.1.11",
+    "gh-pages": "^1.1.0",
+    "html-minifier": "^3.5.11",
+    "img-load": "^1.0.0",
+    "jimp": "^0.2.28",
+    "node-sass": "^4.7.2",
+    "pack": "^2.1.0",
+    "postcss-cli": "^5.0.0",
+    "rollup": "^0.56.5",
+    "rollup-plugin-commonjs": "^9.1.0",
+    "rollup-plugin-json": "^2.3.0",
+    "rollup-plugin-node-resolve": "^3.2.0",
+    "uglify-js": "^3.3.15"
   }
 }
