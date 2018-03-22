@@ -1,27 +1,36 @@
-import loadImage from "img-load"
+import { left, right, top, bottom, intersects } from "hitbox"
+import listen from "key-state"
 import stringify from "css-string"
+import loadImage from "img-load"
 import manifest from "@semibran/manifest"
 import sourcemap from "../dist/tmp/sprites.json"
 import stages from "../dist/tmp/stages.json"
 
-let actor = {
+let sprites = null
+
+let rockman = {
   name: "rockman",
   stats: { speed: 1.296375, jump: 4 },
   hitbox: { halfsize: [ 8, 12 ], position: [ 128, 120 ] },
-  velocity: [ 0, 0 ]
+  velocity: [ 0, 0 ],
+  view: manifest({
+    tag: "canvas",
+    attributes: { class: "actor rockman" },
+    children: []
+  })
 }
 
 let app = {
   stage: {
     name: "overworld",
     gravity: 0.25,
-    actors: [ actor ],
+    actors: [ rockman ],
     blocks: stages.overworld.map(box => {
       let [ x, y, w, h ] = box
       return {
         hitbox: {
           halfsize: [ w * 16 / 2, h * 16 / 2 ],
-          position: [ x * 16, y * 16 - 8 ]
+          position: [ (x + w / 2) * 16, (y + h / 2 - 0.5) * 16 ]
         }
       }
     })
@@ -33,15 +42,79 @@ let app = {
 }
 
 loadImage("sprites.png").then(sheet => {
-  let sprites = extract(sheet, sourcemap)
+  sprites = extract(sheet, sourcemap)
+  Actor.render(rockman, sprites.actors.rockman)
+
   let tree = render(app, sprites)
   let view = manifest(tree)
   document.body.appendChild(view)
+  requestAnimationFrame(loop)
 })
+
+function loop() {
+  let stage = app.stage
+  let actor = stage.actors[0]
+  Stage.update(stage)
+  Actor.render(actor, sprites.actors.rockman)
+  requestAnimationFrame(loop)
+}
+
+const Actor = {
+  render(rockman, sprites) {
+    let [ hw, hh ] = rockman.hitbox.halfsize
+    let [ x, y ] = rockman.hitbox.position
+    let canvas = rockman.view
+    let sprite = Actor.resolve(rockman, sprites)
+
+    canvas.width = sprite.width
+    canvas.height = sprite.height
+    canvas.style.left = (x - hw) + "px"
+    canvas.style.top = (y - hh) + "px"
+
+    let context = canvas.getContext("2d")
+    context.drawImage(sprite, 0, 0)
+  },
+  resolve(rockman, sprites) {
+    return sprites.jump
+  }
+}
+
+const Stage = {
+  update(stage) {
+    for (let actor of stage.actors) {
+      Stage.move(stage, actor, [ actor.velocity[0], 0 ])
+      Stage.move(stage, actor, [ 0, actor.velocity[1] ])
+      actor.velocity[1] += stage.gravity
+    }
+  },
+  move(stage, actor, delta) {
+    actor.hitbox.position[0] += delta[0]
+    actor.hitbox.position[1] += delta[1]
+    for (let block of stage.blocks) {
+      if (intersects(actor.hitbox, block.hitbox)) {
+        if (delta[0] < 0) {
+          left(actor.hitbox, right(block.hitbox))
+          actor.velocity[0] = 0
+        } else if (delta[0] > 0) {
+          right(actor.hitbox, left(block.hitbox))
+          actor.velocity[0] = 0
+        }
+        if (delta[1] < 0) {
+          top(actor.hitbox, bottom(block.hitbox))
+          actor.velocity[1] = 0
+        } else if (delta[1] > 0) {
+          bottom(actor.hitbox, top(block.hitbox))
+          actor.velocity[1] = 0
+        }
+      }
+    }
+  }
+}
 
 function render(app, sprites) {
   let { stage, viewport } = app
-  return { tag: "main",
+  return {
+    tag: "div",
     attributes: {
       class: "stage",
       style: stringify({
@@ -50,8 +123,9 @@ function render(app, sprites) {
       })
     },
     children: [
-      { tag: "div", attributes: { class: "background layer" }, children: [
-        { tag: "div",
+      { tag: "div", attributes: { class: "layer background" }, children: [
+        {
+          tag: "div",
           attributes: {
             class: "backdrop",
             style: stringify({
@@ -63,23 +137,8 @@ function render(app, sprites) {
           ]
         }
       ] },
-      { tag: "div", attributes: { class: "foreground layer" }, children: [
-        ...stage.actors.map(actor => {
-          let [ hw, hh ] = actor.hitbox.halfsize
-          let [ x, y ] = actor.hitbox.position
-          return { tag: "div",
-            attributes: {
-              class: "actor",
-              style: stringify({
-                left: (x - hw) + "px",
-                top: (y - hh) + "px",
-              })
-            },
-            children: [
-              sprites.actors[actor.name].jump
-            ]
-          }
-        })
+      { tag: "div", attributes: { class: "layer foreground"  }, children: [
+        ...stage.actors.map(actor => actor.view)
       ] }
     ]
   }

@@ -17,6 +17,7 @@ body {
 .stage {
   position: relative;
   overflow: hidden;
+  image-rendering: pixelated;
 }
 
 .stage .layer {
