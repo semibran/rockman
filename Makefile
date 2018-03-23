@@ -23,7 +23,6 @@ html:
 
 js:
 	node bin/sprites.js
-	node bin/actors.js
 	node bin/stages.js
 	rollup src/index.js -o dist/index.js -f iife -c -m
 
