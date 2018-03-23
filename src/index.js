@@ -1,6 +1,7 @@
 import sourcemap from "../dist/tmp/sprites.json"
 import actors from "../dist/tmp/actors.json"
 import stages from "../dist/tmp/stages.json"
+import controls from "./controls.json"
 import manifest from "@semibran/manifest"
 import stringify from "css-string"
 import loadImage from "img-load"
@@ -9,12 +10,6 @@ import {
   left, right, top, bottom,
   intersects2D as intersects
 } from "hitbox"
-
-const keys = listen(window, {
-  left:  [ "ArrowLeft",  "KeyA" ],
-  right: [ "ArrowRight", "KeyD" ],
-  jump:  [ "ArrowUp",    "KeyW" ]
-})
 
 let rockman = {
   name: "rockman",
@@ -49,6 +44,10 @@ let app = {
   viewport: {
     size: [ 256, 240 ],
     position: [ 0, 0 ]
+  },
+  input: {
+    held: listen(window, controls),
+    prev: {}
   }
 }
 
@@ -90,49 +89,63 @@ loadImage("sprites.png").then(sheet => {
   })
 })
 
-let prev = {}
 function loop() {
   let stage = app.stage
   let rockman = stage.actors[0]
-  if (keys.left && !keys.right) {
-    Actor.move(rockman, "left")
-  } else if (keys.right && !keys.left) {
-    Actor.move(rockman, "right")
-  } else {
-    Actor.stop(rockman)
+  let commands = Input.resolve(app.input)
+  for (let command of commands) {
+    Actor[command.type](rockman, ...command.args)
   }
 
-  if (keys.jump === 1) {
-    Actor.jump(rockman)
-  } else if (!keys.jump) {
-    Actor.fall(rockman)
-  }
-
-  if (rockman.state.id === "run-start") {
-    if (rockman.state.time === 7) {
-      rockman.state.id = "run"
-      rockman.state.time = 0
-    } else if (rockman.state.time > 0) {
-      rockman.velocity[0] = 0
-    }
-  }
-
-  if (rockman.state.id === "run-stop" && rockman.state.time === 7) {
-    rockman.state.id = "idle"
-    rockman.state.time = 0
-  }
-
-  if (rockman.state.id === "land") {
-    rockman.state.id = "idle"
-    rockman.state.time = 0
-  }
-
+  Actor.update(rockman)
   Stage.update(stage)
+  Input.update(app.input)
   requestAnimationFrame(loop)
-  Object.assign(prev, keys)
+}
+
+const Input = {
+  update(input) {
+    Object.assign(input.prev, input.held)
+  },
+  resolve(input) {
+    let commands = []
+    if (input.held.left && !input.held.right) {
+      commands.push({ type: "move", args: [ "left" ] })
+    } else if (input.held.right && !input.held.left) {
+      commands.push({ type: "move", args: [ "right" ] })
+    } else {
+      commands.push({ type: "stop", args: [] })
+    }
+    if (input.held.jump && !input.prev.jump) {
+      commands.push({ type: "jump", args: [] })
+    } else if (!input.held.jump) {
+      commands.push({ type: "fall", args: [] })
+    }
+    return commands
+  }
 }
 
 const Actor = {
+  update(rockman) {
+    if (rockman.state.id === "run-start") {
+      if (rockman.state.time === 7) {
+        rockman.state.id = "run"
+        rockman.state.time = 0
+      } else if (rockman.state.time > 0) {
+        rockman.velocity[0] = 0
+      }
+    }
+
+    if (rockman.state.id === "run-stop" && rockman.state.time === 7) {
+      rockman.state.id = "idle"
+      rockman.state.time = 0
+    }
+
+    if (rockman.state.id === "land") {
+      rockman.state.id = "idle"
+      rockman.state.time = 0
+    }
+  },
   move(rockman, direction) {
     let delta = 0
     if (direction === "left") {
