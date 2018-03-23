@@ -14,7 +14,7 @@ let rockman = {
   stats: actors.rockman.stats,
   hitbox: {
     halfsize: actors.rockman.size.map(x => x / 2),
-    position: [ 128, 120 ]
+    position: [ 112, 132 ]
   },
   velocity: [ 0, 0 ],
   facing: 1,
