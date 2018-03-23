@@ -13,7 +13,6 @@ for (let name of names) {
     blocks: rectify(stage.layout)
       .map(({ x, y, w, h }) => [ x, y, w, h ])
   }
-  console.log(stages[name].blocks)
 }
 
 fs.writeFileSync(join(dest, "stages.json"), JSON.stringify(stages))

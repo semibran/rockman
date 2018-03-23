@@ -13,11 +13,6 @@ module.exports = {
       offset: [ -3, 1 ]
     },
     {
-      id: "step",
-      path: "sprites/step.png",
-      offset: [ -2, 1 ]
-    },
-    {
       id: "run-0",
       path: "sprites/run-0.png",
       offset: [ -5, 3 ]
@@ -31,6 +26,11 @@ module.exports = {
       id: "run-2",
       path: "sprites/run-2.png",
       offset: [ -5, 3 ]
+    },
+    {
+      id: "run-step",
+      path: "sprites/run-step.png",
+      offset: [ -2, 1 ]
     },
     {
       id: "jump",

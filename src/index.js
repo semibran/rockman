@@ -18,7 +18,7 @@ const keys = listen(window, {
 
 let rockman = {
   name: "rockman",
-  state: { id: "fall", timer: 0 },
+  state: { id: "fall", time: 0 },
   stats: actors.rockman.stats,
   hitbox: {
     halfsize: actors.rockman.size.map(x => x / 2),
@@ -77,50 +77,97 @@ loadImage("sprites.png").then(sheet => {
   requestAnimationFrame(loop)
 })
 
+let prev = {}
 function loop() {
   let stage = app.stage
-  let actor = stage.actors[0]
+  let rockman = stage.actors[0]
   if (keys.left && !keys.right) {
-    actor.velocity[0] = -actor.stats.speed
-    actor.facing = -1
-    if (actor.state.id !== "run") {
-      actor.state.id = "run"
-      actor.state.time = 0
-    }
+    Actor.move(rockman, "left")
   } else if (keys.right && !keys.left) {
-    actor.velocity[0] = actor.stats.speed
-    actor.facing = 1
-    if (actor.state.id !== "run") {
-      actor.state.id = "run"
-      actor.state.time = 0
-    }
+    Actor.move(rockman, "right")
   } else {
-    actor.velocity[0] = 0
-    if (actor.state.id !== "idle") {
-      actor.state.id = "idle"
-      actor.state.time = 0
-    }
+    Actor.stop(rockman)
   }
   if (keys.jump === 1) {
-    if (actor.ground) {
-      actor.velocity[1] = -actor.stats.jump
-      actor.state.id = "jump"
-      actor.state.time = 0
-    }
+    Actor.jump(rockman)
   } else if (!keys.jump) {
-    if (!actor.ground && actor.velocity[1] < 0) {
-      actor.velocity[1] = 0
+    Actor.fall(rockman)
+  }
+
+  if (rockman.state.id === "run-start") {
+    if (rockman.state.time === 7) {
+      rockman.state.id = "run"
+      rockman.state.time = 0
+    } else if (rockman.state.time > 0) {
+      rockman.velocity[0] = 0
     }
   }
-  if (actor.state.id === "land" && actor.state.time === 7) {
-    actor.state.id = "idle"
-    actor.state.time = 0
+  if (rockman.state.id === "run-stop" && rockman.state.time === 7) {
+    rockman.state.id = "idle"
+    rockman.state.time = 0
   }
+  if (rockman.state.id === "land" && rockman.state.time === 1) {
+    rockman.state.id = "idle"
+    rockman.state.time = 0
+  }
+
   Stage.update(stage)
   requestAnimationFrame(loop)
+  Object.assign(prev, keys)
 }
 
 const Actor = {
+  move(rockman, direction) {
+    let delta = 0
+    if (direction === "left") {
+      delta = -1
+    } else if (direction === "right") {
+      delta = 1
+    } else {
+      return
+    }
+    rockman.facing = delta
+    if (rockman.ground) {
+      if (rockman.state.id === "idle") {
+        rockman.velocity[0] = delta
+        rockman.state.id = "run-start"
+        rockman.state.time = 0
+      } else if (rockman.state.id === "land" || rockman.state.id === "run-stop") {
+        rockman.state.id = "run"
+        rockman.state.time = 0
+      }
+    }
+    if (!rockman.ground || rockman.state.id === "run") {
+      rockman.velocity[0] = rockman.stats.speed * delta
+    }
+  },
+  stop(rockman) {
+    if (rockman.ground) {
+      if (rockman.state.id !== "run-stop") {
+        if (rockman.state.id === "run-start") {
+          rockman.state.id = "idle"
+          rockman.state.time = 0
+        } else if (rockman.state.id === "run") {
+          rockman.state.id = "run-stop"
+          rockman.state.time = 0
+        }
+      }
+    }
+    rockman.velocity[0] = 0
+  },
+  jump(rockman) {
+    console.log("uooo")
+    if (rockman.ground) {
+      rockman.velocity[1] = -rockman.stats.jump
+      rockman.state.id = "jump"
+      rockman.state.time = 0
+    }
+  },
+  fall(rockman) {
+    if (!rockman.ground && rockman.velocity[1] < 0) {
+      rockman.velocity[1] = 0
+    }
+  },
   render(rockman, sprites) {
     let id = Actor.resolve(rockman, sprites)
     let direction = rockman.facing === -1 ? "left" : "right"
@@ -156,6 +203,10 @@ const Actor = {
         } else {
           return `run-${index}`
         }
+      } else if (rockman.state.id === "run-start"
+      || rockman.state.id === "run-stop"
+      ) {
+        return "run-step"
       } else if (rockman.state.id === "land") {
         return "run-0"
       }
