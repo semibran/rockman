@@ -3,14 +3,16 @@ const fs = require("fs")
 const rectify = require("../lib/rectify")
 const src = join(__dirname, "../src/stages/")
 const dest = join(__dirname, "../dist/tmp/")
-const stages = fs.readdirSync(src)
-const data = {}
+const names = fs.readdirSync(src)
+const stages = {}
 
-for (let name of stages) {
+for (let name of names) {
   let stage = require(join(src, name))
-  let boxes = rectify(stage.layout)
-    .map(({ x, y, w, h }) => [ x, y, w, h])
-  data[name] = boxes
+  stages[name] = {
+    gravity: stage.gravity,
+    blocks: rectify(stage.layout)
+      .map(({ x, y, w, h }) => [ x, y, w, h ])
+  }
 }
 
-fs.writeFileSync(join(dest, "stages.json"), JSON.stringify(data))
+fs.writeFileSync(join(dest, "stages.json"), JSON.stringify(stages))

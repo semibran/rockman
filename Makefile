@@ -9,6 +9,7 @@ SHELL := /bin/bash
 all: clean
 	mkdir -p dist/tmp
 	node bin/sprites.js
+	node bin/actors.js
 	node bin/stages.js
 	make html js css
 	babel dist/index.js --presets=env | uglifyjs -o dist/index.js -c -m

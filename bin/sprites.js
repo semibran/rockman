@@ -11,12 +11,18 @@ let sourcemap = {}
 
 async function main() {
   for (let id of actors) {
-    let path = join(src, "actors", id, "sprites")
-    let files = fs.readdirSync(path)
-    for (let file of files) {
-      let name = file.slice(0, file.lastIndexOf("."))
-      let image = await Jimp.read(join(path, file))
-      sprites[`actors.${id}.${name}`] = image
+    let path = join(src, "actors", id)
+    let actor = require(path)
+    for (let sprite of actor.sprites) {
+      let slash = sprite.path.lastIndexOf("/") + 1
+      if (!slash) slash = 0
+
+      let dot = sprite.path.lastIndexOf(".")
+      if (dot === -1) dot = sprite.path.length
+
+      let name = sprite.path.slice(slash, dot)
+      let image = await Jimp.read(join(path, sprite.path))
+      sprites[`actors/${id}/${name}`] = image
     }
   }
 
@@ -43,7 +49,7 @@ async function main() {
       }
     }
 
-    sprites[`stages.${id}.backdrop`] = backdrop
+    sprites[`stages/${id}/backdrop`] = backdrop
   }
 
   let names = Object.keys(sprites)
