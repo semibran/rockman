@@ -64,17 +64,30 @@ loadImage("sprites.png").then(sheet => {
       let sprite = sprites.actors[name][entry.id]
       offsets[name][entry.id] = {
         right: entry.offset,
-        left: [ -(sprite.left.width + entry.offset[0] - actors.rockman.size[0]), entry.offset[1] ]
+        left: [
+          -sprite.left.width - entry.offset[0] + actors.rockman.size[0],
+          entry.offset[1] // ^ complicated hack for flipped offsets
+        ]
       }
     }
   }
 
-  Actor.render(app.stage.actors[0], sprites.actors.rockman)
+  for (let actor of app.stage.actors) {
+    Actor.render(actor, sprites.actors[actor.name])
+  }
 
   let tree = render(app, sprites)
   let view = manifest(tree)
   document.body.appendChild(view)
   requestAnimationFrame(loop)
+
+  window.addEventListener("resize", e => {
+    view.style.transform = `scale(${
+      window.innerWidth <= window.innerHeight
+        ? window.innerWidth / app.viewport.size[0]
+        : window.innerHeight / app.viewport.size[1]
+    })`
+  })
 })
 
 let prev = {}
@@ -88,6 +101,7 @@ function loop() {
   } else {
     Actor.stop(rockman)
   }
+
   if (keys.jump === 1) {
     Actor.jump(rockman)
   } else if (!keys.jump) {
@@ -102,11 +116,13 @@ function loop() {
       rockman.velocity[0] = 0
     }
   }
+
   if (rockman.state.id === "run-stop" && rockman.state.time === 7) {
     rockman.state.id = "idle"
     rockman.state.time = 0
   }
-  if (rockman.state.id === "land" && rockman.state.time === 1) {
+
+  if (rockman.state.id === "land") {
     rockman.state.id = "idle"
     rockman.state.time = 0
   }
@@ -156,7 +172,6 @@ const Actor = {
     rockman.velocity[0] = 0
   },
   jump(rockman) {
-    console.log("uooo")
     if (rockman.ground) {
       rockman.velocity[1] = -rockman.stats.jump
       rockman.state.id = "jump"
@@ -278,7 +293,12 @@ function render(app, sprites) {
       class: "stage",
       style: stringify({
         width: viewport.size[0] + "px",
-        height: viewport.size[1] + "px"
+        height: viewport.size[1] + "px",
+        transform: `scale(${
+          window.innerWidth <= window.innerHeight
+            ? window.innerWidth / viewport.size[0]
+            : window.innerHeight / viewport.size[1]
+        })`
       })
     },
     children: [

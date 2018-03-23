@@ -25,12 +25,12 @@ module.exports = {
     {
       id: "run-2",
       path: "sprites/run-2.png",
-      offset: [ -5, 3 ]
+      offset: [ -6, 3 ]
     },
     {
       id: "run-step",
       path: "sprites/run-step.png",
-      offset: [ -2, 1 ]
+      offset: [ -3, 1 ]
     },
     {
       id: "jump",
