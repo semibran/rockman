@@ -8,9 +8,6 @@ SHELL := /bin/bash
 
 all: clean
 	mkdir -p dist/tmp
-	node bin/sprites.js
-	node bin/actors.js
-	node bin/stages.js
 	make html js css
 	babel dist/index.js --presets=env | uglifyjs -o dist/index.js -c -m
 	postcss dist/style.css -u autoprefixer -o dist/style.css -m
@@ -25,6 +22,9 @@ html:
 	cp src/index.html dist/index.html
 
 js:
+	node bin/sprites.js
+	node bin/actors.js
+	node bin/stages.js
 	rollup src/index.js -o dist/index.js -f iife -c -m
 
 css:

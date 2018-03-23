@@ -22,7 +22,9 @@ async function main() {
 
       let name = sprite.path.slice(slash, dot)
       let image = await Jimp.read(join(path, sprite.path))
-      sprites[`actors/${id}/${name}`] = image
+      let flipped = image.clone().flip(true, false)
+      sprites[`actors/${id}/${name}/right`] = image
+      sprites[`actors/${id}/${name}/left`] = flipped
     }
   }
 
