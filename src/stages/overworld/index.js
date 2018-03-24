@@ -1,3 +1,7 @@
+const paths = {
+  pipe: "sprites/pipe.png"
+}
+
 module.exports = {
   gravity: 0.25,
   tiles: [

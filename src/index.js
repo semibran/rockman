@@ -49,13 +49,10 @@ let app = {
 }
 
 let sprites = null
-let offsets = null
 
 loadImage("sprites.png").then(sheet => {
   sprites = extract(sheet, sourcemap)
-  offsets = {}
   for (let name in actors) {
-    offsets[name] = {}
     for (let entry of actors[name].sprites) {
       let sprite = sprites.actors[name][entry.id]
       let canvas = document.createElement("canvas")
