@@ -58,16 +58,22 @@ loadImage("sprites.png").then(sheet => {
     offsets[name] = {}
     for (let entry of actors[name].sprites) {
       let sprite = sprites.actors[name][entry.id]
-      sprite.right = {
-        image: sprite.right,
-        offset: entry.offset
-      }
-      sprite.left = {
-        image: sprite.left,
-        offset: [
-          -sprite.left.width - entry.offset[0] + actors.rockman.size[0],
-          entry.offset[1] // ^ hacky flipped offset calculation
-        ]
+      let canvas = document.createElement("canvas")
+      let context = canvas.getContext("2d")
+      context.scale(-1, 1)
+      context.drawImage(sprite, -sprite.width, 0)
+      sprites.actors[name][entry.id] = {
+        right: {
+          image: sprite,
+          offset: entry.offset
+        },
+        left: {
+          image: canvas,
+          offset: [
+            -sprite.width - entry.offset[0] + actors.rockman.size[0],
+            entry.offset[1] // ^ hacky flipped offset calculation
+          ]
+        }
       }
     }
   }
