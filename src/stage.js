@@ -20,8 +20,8 @@ function move(stage, actor, delta) {
 
   if (left(actor.hitbox) < 0) {
     left(actor.hitbox, 0)
-  } else if (right(actor.hitbox) > 256) {
-    right(actor.hitbox, 256)
+  } else if (right(actor.hitbox) > 512) {
+    right(actor.hitbox, 512)
   }
 
   let ground = null

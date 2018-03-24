@@ -10,13 +10,14 @@ for (let name of names) {
   let stage = require(join(src, name))
   let layout = {
     size: stage.layout.size,
-    data: stage.layout.data.map(id => {
+    data: stage.layout.data.map((id, i) => {
       let tile = stage.tiles[id]
       return !!(tile.traits && tile.traits.solid) ? 1 : 0
     })
   }
   stages[name] = {
     gravity: stage.gravity,
+    size: stage.layout.size,
     blocks: rectify(layout)
       .map(({ x, y, width, height }) => [ x, y, width, height ])
   }

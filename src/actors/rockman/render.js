@@ -9,7 +9,6 @@ module.exports = function render(rockman, sprites) {
   let [ halfwidth, halfheight ] = hitbox.halfsize
   let left = Math.round((x - halfwidth) + offset[0])
   let top = Math.round((y - halfheight) + offset[1])
-
   canvas.width = sprite.width
   canvas.height = sprite.height
   canvas.style.left = left + "px"
@@ -39,7 +38,7 @@ function resolve(rockman) {
     } else if (rockman.state.id === "land") {
       return "run-0"
     }
-  } else {
-    return "jump"
   }
+
+  return "jump"
 }

@@ -49,6 +49,7 @@ let app = {
 }
 
 let sprites = null
+let viewport = null
 
 loadImage("sprites.png").then(sheet => {
   sprites = extract(sheet, sourcemap)
@@ -57,6 +58,8 @@ loadImage("sprites.png").then(sheet => {
       let sprite = sprites.actors[name][entry.id]
       let canvas = document.createElement("canvas")
       let context = canvas.getContext("2d")
+      canvas.width = sprite.width
+      canvas.height = sprite.height
       context.scale(-1, 1)
       context.drawImage(sprite, -sprite.width, 0)
       sprites.actors[name][entry.id] = {
@@ -84,13 +87,19 @@ loadImage("sprites.png").then(sheet => {
   document.body.appendChild(view)
   requestAnimationFrame(loop)
 
-  window.addEventListener("resize", e => {
+  viewport = view.children[0]
+
+  window.addEventListener("resize", resize)
+
+  function resize(e) {
     view.style.transform = `scale(${
       window.innerWidth <= window.innerHeight
         ? window.innerWidth / app.viewport.size[0]
         : window.innerHeight / app.viewport.size[1]
     })`
-  })
+  }
+
+  resize()
 })
 
 function loop() {
@@ -107,6 +116,11 @@ function loop() {
     actors[actor.name].actions.update(actor)
     actors[actor.name].actions.render(actor, sprites.actors[actor.name])
   }
+
+  let left = -Math.round(actor.hitbox.position[0] - app.viewport.size[0] / 2)
+  if (left >= 0) left = 0
+  if (left < -256) left = -256
+  viewport.style.left = left + "px"
 
   Input.update(app.input)
   requestAnimationFrame(loop)
@@ -144,23 +158,22 @@ function render(app, sprites) {
   return {
     tag: "div",
     attributes: {
-      class: "stage",
+      class: "viewport",
       style: stringify({
         width: viewport.size[0] + "px",
-        height: viewport.size[1] + "px",
-        transform: `scale(${
-          window.innerWidth <= window.innerHeight
-            ? window.innerWidth / viewport.size[0]
-            : window.innerHeight / viewport.size[1]
-        })`
+        height: viewport.size[1] + "px"
       })
     },
     children: [
-      { tag: "div", attributes: { class: "layer background" }, children: [
-        sprites.stages[stage.name].backdrop
-      ] },
-      { tag: "div", attributes: { class: "layer foreground" }, children: [
-        ...stage.actors.map(actor => actor.view)
+      { tag: "div", attributes: { class: "viewport-inner" }, children: [
+        { tag: "div", attributes: { class: "stage" }, children: [
+          { tag: "div", attributes: { class: "layer background" }, children: [
+            sprites.stages[stage.name].backdrop
+          ] },
+          { tag: "div", attributes: { class: "layer foreground" }, children: [
+            ...stage.actors.map(actor => actor.view)
+          ] }
+        ] }
       ] }
     ]
   }

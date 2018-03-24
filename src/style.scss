@@ -14,13 +14,17 @@ body {
   background: black;
 }
 
-.stage {
-  position: relative;
+.viewport {
   overflow: hidden;
   image-rendering: pixelated;
 }
 
-.stage .layer {
+.viewport-inner {
+  display: flex;
+  position: absolute;
+}
+
+.stage, .stage .layer {
   display: flex;
   position: absolute;
   width: 100%;
