@@ -33,9 +33,32 @@ async function main() {
     let backdrop = await new Jimp(w * 16, h * 16)
 
     let images = []
+    let cache = {}
     for (let tile of stage.tiles) {
-      let path = join(src, "stages", id, "sprites", tile.name + ".png")
-      let image = await Jimp.read(path)
+      let sprite = await Jimp.read(join(src, "stages", id, tile.sprite.path))
+      let location = tile.sprite.location
+      let [ x, y, i ] = [ 0, 0, 0 ]
+      if (location) {
+        let cols = Math.ceil(sprite.bitmap.width / 16)
+        if (Array.isArray(location)) {
+          [ x, y ] = location
+          i = y * cols + x
+        } else {
+          i = location
+          x = i % cols
+          y = (i - x) / cols
+        }
+      }
+      let name = join(id, tile.sprite.path, i.toString())
+      let image = null
+      if (cache[name]) {
+        image = cache[name]
+      } else {
+        image = await new Jimp(16, 16)
+        image.blit(sprite, 0, 0, x * 16, y * 16, 16, 16)
+        image.write(join(dest, "../sprites", name + ".png"))
+        cache[name] = image
+      }
       images.push(image)
     }
 

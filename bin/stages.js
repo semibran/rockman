@@ -8,10 +8,17 @@ const stages = {}
 
 for (let name of names) {
   let stage = require(join(src, name))
+  let layout = {
+    size: stage.layout.size,
+    data: stage.layout.data.map(id => {
+      let tile = stage.tiles[id]
+      return !!(tile.traits && tile.traits.solid) ? 1 : 0
+    })
+  }
   stages[name] = {
     gravity: stage.gravity,
-    blocks: rectify(stage.layout)
-      .map(({ x, y, w, h }) => [ x, y, w, h ])
+    blocks: rectify(layout)
+      .map(({ x, y, width, height }) => [ x, y, width, height ])
   }
 }
 
