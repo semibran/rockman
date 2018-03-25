@@ -28,6 +28,7 @@ let rockman = {
 
 let app = {
   stage: {
+    time: 0,
     name: "overworld",
     gravity: stages.overworld.gravity,
     blocks: stages.overworld.blocks.map(([ x, y, w, h ]) => ({

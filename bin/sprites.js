@@ -34,6 +34,9 @@ async function main() {
 
     let images = []
     for (let tile of stage.tiles) {
+      if (Array.isArray(tile.sprite)) {
+        // is animation, do special things
+      }
       let sprite = await Jimp.read(join(src, "stages", id, tile.sprite.path))
       let image = await new Jimp(16, 16)
       let location = tile.sprite.location

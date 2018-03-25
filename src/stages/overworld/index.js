@@ -39,6 +39,15 @@ const images = {
   }
 }
 
+const animations = {
+  question: [
+    { image: images.question[0], delay: 15 },
+    { image: images.question[1], delay: 7 },
+    { image: images.question[2], delay: 7 },
+    { image: images.question[1], delay: 7 },
+  ]
+}
+
 exports.gravity = 0.25
 
 exports.tiles = [
