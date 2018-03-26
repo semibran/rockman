@@ -1,4 +1,4 @@
-const join = require("path").join
+const { join, basename, extname } = require("path")
 const fs = require("fs")
 const Jimp = require("jimp")
 const pack = require("pack")
@@ -6,43 +6,41 @@ const src = join(__dirname, "../src")
 const dest = join(__dirname, "../dist")
 const actors = fs.readdirSync(join(src, "actors"))
 const stages = fs.readdirSync(join(src, "stages"))
-let sprites = {}
+let ids = []
+let cache = {}
 let sourcemap = {}
 
 async function main() {
-  for (let id of actors) {
-    let path = join(src, "actors", id)
-    let actor = require(path)
-    for (let sprite of actor.sprites) {
-      let slash = sprite.path.lastIndexOf("/") + 1
-      if (!slash) slash = 0
+  for (let actor of actors) {
+    let path = join(src, "actors", actor)
+    let data = require(path)
+    for (let sprite of data.sprites) {
+      let path = join(src, "actors", actor, sprite.path)
+      let name = basename(path, extname(path))
+      let id = `actors/${actor}/${name}`
+      ids.push(id)
 
-      let dot = sprite.path.lastIndexOf(".")
-      if (dot === -1) dot = sprite.path.length
-
-      let name = sprite.path.slice(slash, dot)
-      let image = await Jimp.read(join(path, sprite.path))
-      sprites[`actors/${id}/${name}`] = image
+      if (!cache[id]) {
+        cache[id] = await Jimp.read(path)
+      }
     }
   }
 
-  for (let id of stages) {
-    let path = join(src, "stages", id)
-    let stage = require(path)
-    let [ w, h ] = stage.layout.size
-    let backdrop = await new Jimp(w * 16, h * 16)
-
-    let images = []
-    for (let tile of stage.tiles) {
-      if (Array.isArray(tile.sprite)) {
-        // is animation, do special things
+  for (let stage of stages) {
+    let path = join(src, "stages", stage)
+    let data = require(path)
+    for (let tile of data.tiles) {
+      let path = join(src, "stages", stage, tile.sprite.path)
+      let name = basename(path, extname(path))
+      if (!cache[path]) {
+        cache[path] = await Jimp.read(path)
       }
-      let sprite = await Jimp.read(join(src, "stages", id, tile.sprite.path))
-      let image = await new Jimp(16, 16)
+
+      let source = cache[path]
       let location = tile.sprite.location
       let [ x, y, i ] = [ 0, 0, 0 ]
       if (location) {
-        let cols = Math.ceil(sprite.bitmap.width / 16)
+        let cols = Math.ceil(source.bitmap.width / 16)
         if (Array.isArray(location)) {
           [ x, y ] = location
           i = y * cols + x
@@ -52,36 +50,30 @@ async function main() {
           y = (i - x) / cols
         }
       }
-      image.blit(sprite, 0, 0, x * 16, y * 16, 16, 16)
-      images.push(image)
-    }
 
-    let i = 0
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        let index = stage.layout.data[i]
-        let image = images[index]
-        backdrop.blit(image, x * 16, y * 16)
-        i++
+      let id = `stages/${stage}/${i}`
+      ids.push(id)
+
+      if (!cache[id]) {
+        let image = await new Jimp(16, 16)
+        image.blit(source, 0, 0, x * 16, y * 16, 16, 16)
+        cache[id] = image
       }
     }
-
-    sprites[`stages/${id}/backdrop`] = backdrop
   }
 
-  let names = Object.keys(sprites)
-  let images = Object.values(sprites)
+  let images = ids.map(id => cache[id])
   let sizes = images.map(image => [ image.bitmap.width, image.bitmap.height ])
   let layout = pack(sizes)
   let sheet = await new Jimp(layout.size[0], layout.size[1])
-  for (let i = 0; i < names.length; i++) {
-    let name = names[i]
+  for (let i = 0; i < ids.length; i++) {
+    let id = ids[i]
     let image = images[i]
     let box = layout.boxes[i]
     let [ x, y ] = box.position
     let [ w, h ] = box.size
     sheet.blit(image, x, y)
-    sourcemap[name] = [ x, y, w, h ]
+    sourcemap[id] = [ x, y, w, h ]
   }
 
   sheet.write(join(dest, "sprites.png"))
